@@ -19,55 +19,84 @@ DROP VIEW IF EXISTS q4v;
 -- Question 0
 CREATE VIEW q0(era)
 AS
-  SELECT 1 -- replace this line
+  SELECT MAX(era)
+  FROM pitching
 ;
 
 -- Question 1i
 CREATE VIEW q1i(namefirst, namelast, birthyear)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT namefirst, namelast, birthyear
+  FROM people p
+  WHERE p.weight > 300
 ;
 
 -- Question 1ii
 CREATE VIEW q1ii(namefirst, namelast, birthyear)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT namefirst, namelast, birthyear
+  FROM people
+  WHERE namefirst LIKE '% %'
+  ORDER BY namefirst, namelast
 ;
 
 -- Question 1iii
 CREATE VIEW q1iii(birthyear, avgheight, count)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT birthyear, AVG(height), COUNT(*)
+  FROM people
+  GROUP BY birthyear
+  ORDER BY birthyear
 ;
 
 -- Question 1iv
 CREATE VIEW q1iv(birthyear, avgheight, count)
 AS
-  SELECT 1, 1, 1 -- replace this line
+  SELECT birthyear, AVG(height), COUNT(*)
+  FROM people
+  GROUP BY birthyear
+  HAVING AVG(height) > 70
+  ORDER BY birthyear
 ;
 
 -- Question 2i
 CREATE VIEW q2i(namefirst, namelast, playerid, yearid)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+  SELECT namefirst, namelast, p.playerid, yearid
+  FROM people p, halloffame ha
+  WHERE p.playerid = ha.playerid AND ha.inducted LIKE 'Y'
+  ORDER BY yearid DESC, p.playerid
 ;
 
 -- Question 2ii
 CREATE VIEW q2ii(namefirst, namelast, playerid, schoolid, yearid)
 AS
-  SELECT 1, 1, 1, 1, 1 -- replace this line
+ SELECT namefirst, namelast, q2i.playerid, C.schoolid, q2i.yearid
+   FROM q2i, collegeplaying C, schools S
+   WHERE C.playerid = q2i.playerid AND C.schoolid = S.schoolid AND S.schoolState LIKE 'CA'
+   ORDER BY q2i.yearid DESC, C.schoolid, q2i.playerid
 ;
+
+-- More directly case
+-- SELECT namefirst, namelast, p.playerid, pl.schoolid, ha.yearid
+--    FROM people p, halloffame ha, collegeplaying pl, schools sc
+--    WHERE p.playerid = ha.playerid AND ha.inducted LIKE 'Y' AND p.playerid = pl.playerid
+--      AND pl.schoolid = sc.schoolid AND sc.schoolState LIKE 'CA'
+--    ORDER BY ha.yearid DESC, pl.schoolid, p.playerid
 
 -- Question 2iii
 CREATE VIEW q2iii(playerid, namefirst, namelast, schoolid)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+  SELECT q2i.playerid, namefirst, namelast, schoolid
+  FROM q2i
+  LEFT OUTER JOIN collegeplaying C ON C.playerid = q2i.playerid
+  ORDER BY q2i.playerid DESC, schoolid
 ;
 
 -- Question 3i
 CREATE VIEW q3i(playerid, namefirst, namelast, yearid, slg)
 AS
-  SELECT 1, 1, 1, 1, 1 -- replace this line
+  SELECT 1, 1, 1, 1, 1
 ;
 
 -- Question 3ii
