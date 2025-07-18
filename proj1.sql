@@ -96,19 +96,60 @@ AS
 -- Question 3i
 CREATE VIEW q3i(playerid, namefirst, namelast, yearid, slg)
 AS
-  SELECT 1, 1, 1, 1, 1
+WITH slg_cal AS (
+  SELECT playerid, yearid, ((H - H2B - H3B - HR) + 2*H2B + 3*H3B + 4*HR) / CAST(AB AS FLOAT) AS slg
+  FROM batting
+  WHERE AB > 50
+)
+  SELECT P.playerid, namefirst, namelast, yearid, slg
+  FROM people P, slg_cal S
+  WHERE P.playerid = S.playerid
+  ORDER BY slg DESC, yearid, P.playerid
+  LIMIT 10
 ;
 
 -- Question 3ii
 CREATE VIEW q3ii(playerid, namefirst, namelast, lslg)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+WITH bat_sum AS (
+  SELECT playerid, SUM(H) AS LH, SUM(H2B) AS L2B, SUM(H3B) AS L3B, SUM(HR) AS LHR, SUM(AB) AS LAB
+  FROM batting
+  GROUP BY playerid
+),
+  lslg_cal AS (
+  SELECT playerid, ((LH - L2B - L3B - LHR) + 2*L2B + 3*L3B + 4*LHR) / CAST(LAB AS FLOAT) AS lslg
+  FROM bat_sum
+  WHERE LAB > 50
+)
+  SELECT P.playerid, namefirst, namelast, lslg
+  FROM people P, lslg_cal L
+  WHERE P.playerid = L.playerid
+  ORDER BY lslg DESC, P.playerid
+  LIMIT 10
 ;
 
 -- Question 3iii
 CREATE VIEW q3iii(namefirst, namelast, lslg)
 AS
-  SELECT 1, 1, 1 -- replace this line
+WITH bat_sum AS (
+  SELECT playerid, SUM(H) AS LH, SUM(H2B) AS L2B, SUM(H3B) AS L3B, SUM(HR) AS LHR, SUM(AB) AS LAB
+  FROM batting
+  GROUP BY playerid
+  HAVING SUM(AB) > 50
+),
+  lslg_cal AS (
+     SELECT playerid, ((LH - L2B - L3B - LHR) + 2*L2B + 3*L3B + 4*LHR) / CAST(LAB AS FLOAT) AS lslg
+     FROM bat_sum
+),
+  goat AS (
+    SELECT playerid, lslg
+    FROM lslg_cal L
+    WHERE L.playerid LIKE 'mayswi01'
+  )
+
+  SELECT namefirst, namelast, lslg
+  FROM people P, lslg_cal L
+  WHERE P.playerid = L.playerid AND L.lslg > (SELECT lslg FROM goat)
 ;
 
 -- Question 4i
