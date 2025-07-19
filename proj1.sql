@@ -155,28 +155,51 @@ WITH bat_sum AS (
 -- Question 4i
 CREATE VIEW q4i(yearid, min, max, avg)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+  SELECT yearid, MIN(salary), MAX(salary), AVG(salary)
+  FROM salaries
+  GROUP BY yearid
+  ORDER BY yearid
 ;
 
 -- Question 4ii
 CREATE VIEW q4ii(binid, low, high, count)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+WITH range AS (
+  SELECT binid, (min + binid*(max - min) / 10) AS low, (min + (binid + 1)*(max - min) / 10) AS high
+  FROM binids,
+       (SELECT MIN(salary) AS min, MAX(salary) AS max
+        FROM salaries
+        WHERE yearid = 2016
+        GROUP BY yearid)
+)
+  SELECT binid, low, high, COUNT(*)
+  FROM salaries S, range R
+  WHERE yearid = 2016 AND ((binid < 9 AND salary >= low AND salary < high) OR (binid = 9 AND salary >= low AND salary <= high))
+  GROUP BY binid
 ;
 
 -- Question 4iii
 CREATE VIEW q4iii(yearid, mindiff, maxdiff, avgdiff)
 AS
-  SELECT 1, 1, 1, 1 -- replace this line
+  SELECT Q2.yearid, Q2.min - Q1.min, Q2.max - Q1.max, Q2.avg - Q1.avg
+  FROM q4i Q1, q4i Q2
+  WHERE Q1.yearid + 1 = Q2.yearid
+  ORDER BY Q2.yearid
 ;
 
 -- Question 4iv
 CREATE VIEW q4iv(playerid, namefirst, namelast, salary, yearid)
 AS
-  SELECT 1, 1, 1, 1, 1 -- replace this line
+  SELECT P.playerid, namefirst, namelast, S.salary, S.yearid
+  FROM people P, salaries S, q4i Q
+  WHERE P.playerid = S.playerid AND S.yearid = Q.yearid AND S.yearid IN (2000, 2001) AND S.salary >= Q.max
 ;
+
 -- Question 4v
 CREATE VIEW q4v(team, diffAvg) AS
-  SELECT 1, 1 -- replace this line
+  SELECT A.teamid, MAX(S.salary) - MIN(S.salary)
+  FROM salaries S, allstarfull A
+  WHERE S.yearid = 2016 AND S.yearid = A.yearid AND S.playerid = A.playerid
+  GROUP BY A.teamid
 ;
 
